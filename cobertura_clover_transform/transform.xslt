@@ -14,18 +14,23 @@
             </xsl:attribute>
         <xsl:apply-templates
             select='//classes'/>
-        <xsl:variable name='ncloc' select='count(current()//line) - count(current()//methods//line)'/>
+        <xsl:variable name='methods' select='count(current()//methods//line)'/>
+        <xsl:variable name='ncloc' select='count(current()//line) - number($methods)'/>
         <xsl:call-template name='metrics'>
             <xsl:with-param name='ncloc'
                 select="$ncloc"
                 />
             <xsl:with-param name='files'
-                select="count(current()//classes)"
+                select="count(current()//class)"
                 />
             <xsl:with-param name='elements'
                 select='$ncloc'/>
             <xsl:with-param name='coveredelements'
                 select='number($ncloc) + count(current()//methods//line[number(@hits) = 0]) - count(current()//line[number(@hits) = 0])'/>
+            <xsl:with-param name='methods'
+                select='$methods'/>
+            <xsl:with-param name='coveredmethods'
+                select='number($methods) - count(current()//methods//line[number(@hits) = 0])'/>
         </xsl:call-template>
         </project>
     </coverage>
@@ -45,26 +50,33 @@
                 </xsl:attribute>
             </line>
         </xsl:for-each>
-        <xsl:variable name='ncloc' select='count(current()//line) - count(current()//methods//line)'/>
+        <xsl:variable name='methods' select='count(current()//methods//line)'/>
+        <xsl:variable name='ncloc' select='count(current()//line) - number($methods)'/>
         <xsl:call-template name='metrics'>
             <xsl:with-param name='ncloc'
                 select="$ncloc"
                 />
             <xsl:with-param name='files'
-                select="count(current()//classes)"
+                select="1"
                 />
             <xsl:with-param name='elements'
                 select='$ncloc'/>
             <xsl:with-param name='coveredelements'
                 select='number($ncloc) + count(current()//methods//line[number(@hits) = 0]) - count(current()//line[number(@hits) = 0])'/>
+            <xsl:with-param name='methods'
+                select='$methods'/>
+            <xsl:with-param name='coveredmethods'
+                select='number($methods) - count(current()//methods//line[number(@hits) = 0])'/>
         </xsl:call-template>
     </file>
 </xsl:template>
 <xsl:template name='metrics'>
     <xsl:param name='elements' select='number(0)'/>
     <xsl:param name='coveredelements' select='number(0)'/>
-    <xsl:param name='files'/>
+    <xsl:param name='files' select='number(0)'/>
     <xsl:param name='ncloc' select='number(0)'/>
+    <xsl:param name='methods' select='number(0)'/>
+    <xsl:param name='coveredmethods' select='number(0)'/>
     <metrics>
         <xsl:attribute name='ncloc'>
             <xsl:value-of select='$ncloc'/>
@@ -79,9 +91,19 @@
                 <xsl:value-of select='$elements'/>
             </xsl:attribute>
         </xsl:if>
-        <xsl:if test='files != 0'>
+        <xsl:if test='number(files) != 0'>
             <xsl:attribute name='files'>
                 <xsl:value-of select='$files'/>
+            </xsl:attribute>
+        </xsl:if>
+        <xsl:if test='number(methods) != 0'>
+            <xsl:attribute name='methods'>
+                <xsl:value-of select='$methods'/>
+            </xsl:attribute>
+        </xsl:if>
+        <xsl:if test='number(coveredmethods) != 0'>
+            <xsl:attribute name='coveredmethods'>
+                <xsl:value-of select='$coveredmethods'/>
             </xsl:attribute>
         </xsl:if>
     </metrics>
